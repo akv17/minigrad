@@ -19,6 +19,23 @@ class TestOps(unittest.TestCase):
         ('pow:3', '__pow__', 3.0, 0.5),
         ('pow:4', '__pow__', 3.0, 4.3),
         ('pow:5', '__pow__', 1.0, 10),
+        
+        ('exp:0', 'exp', 2),
+        ('exp:1', 'exp', 0),
+        ('exp:2', 'exp', 1),
+        ('exp:3', 'exp', 3.33),
+        ('exp:4', 'exp', -4.11),
+        
+        ('log:0', 'log', 2.7),
+        ('log:1', 'log', 1e-5),
+        ('log:2', 'log', 1.0),
+        ('log:3', 'log', 42),
+        
+        ('sqrt:0', 'sqrt', 9.0),
+        ('sqrt:1', 'sqrt', 2.72422),
+        ('sqrt:2', 'sqrt', 1e-5),
+        ('sqrt:3', 'sqrt', 121.221),
+
     ])
     def test_unary_op(self, name, op, x, *args):
         t_x = torch.tensor(x, requires_grad=True, dtype=torch.float64)

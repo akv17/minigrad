@@ -1,3 +1,4 @@
+import math
 from uuid import uuid4
 
 
@@ -35,6 +36,10 @@ class Node:
         out._backward = _backward
         return out
 
+    def __truediv__(self, other):
+        out = self * (other ** -1)
+        return out
+
     def __pow__(self, value):
         out = Node(data=self.data ** value, _children=(self,), _op='pow')
         
@@ -44,9 +49,28 @@ class Node:
         
         out._backward = _backward
         return out
+    
+    def exp(self):
+        data = math.exp(self.data)
+        out = Node(data=data, _children=(self,), _op='exp')
 
-    def __truediv__(self, other):
-        out = self * (other ** -1)
+        def _backward():
+            self.grad += data * out.grad
+        
+        out._backward = _backward
+        return out
+    
+    def log(self):
+        out = Node(data=math.log(self.data), _children=(self,), _op='log')
+
+        def _backward():
+            self.grad += 1 / self.data * out.grad
+        
+        out._backward = _backward
+        return out
+
+    def sqrt(self):
+        out = self ** 0.5
         return out
 
     def backward(self):
