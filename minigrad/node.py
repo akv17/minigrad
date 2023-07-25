@@ -72,6 +72,27 @@ class Node:
     def sqrt(self):
         out = self ** 0.5
         return out
+    
+    def relu(self):
+        data = self.data if self.data > 0.0 else 0.0
+        out = Node(data=data, _children=(self,), _op='relu')
+
+        def _backward():
+            value = 1.0 if self.data > 0.0 else 0.0
+            self.grad += value * out.grad
+        
+        out._backward = _backward
+        return out
+
+    def sigmoid(self):
+        data = 1 / (1 + math.exp(-self.data))
+        out = Node(data=data, _children=(self,), _op='sigmoid')
+
+        def _backward():
+            self.grad += data * (1 - data) * out.grad
+        
+        out._backward = _backward
+        return out
 
     def backward(self):
         self.grad = 1.0

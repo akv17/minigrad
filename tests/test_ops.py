@@ -35,6 +35,16 @@ class TestOps(unittest.TestCase):
         ('sqrt:1', 'sqrt', 2.72422),
         ('sqrt:2', 'sqrt', 1e-5),
         ('sqrt:3', 'sqrt', 121.221),
+        
+        ('relu:0', 'relu', -1.0),
+        ('relu:1', 'relu', 0.0),
+        ('relu:2', 'relu', 1e-5),
+        
+        ('sigmoid:0', 'sigmoid', 0.0),
+        ('sigmoid:1', 'sigmoid', -0.99),
+        ('sigmoid:2', 'sigmoid', 0.99),
+        ('sigmoid:3', 'sigmoid', 13.45),
+        ('sigmoid:4', 'sigmoid', -54.0121),
 
     ])
     def test_unary_op(self, name, op, x, *args):
