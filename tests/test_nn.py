@@ -9,10 +9,10 @@ except ImportError:
     raise ImportError('PyTorch required to run tests')
 
 from minigrad.nn import Neuron, Linear
+from tests.util import check_arr
 
 
 class TestNN(unittest.TestCase):
-    FP_PRECISION = 3
 
     @parameterized.expand([
         (2, 'identity'),
@@ -58,19 +58,19 @@ class TestNN(unittest.TestCase):
         m_out.backward()
         m_grad = [p.grad for p in m_neuron.parameters()]
 
-        self.assertAlmostEqual(t_out.item(), m_out.data, places=self.FP_PRECISION, msg='forward')
+        self.assertAlmostEqual(t_out.item(), m_out.data, places=4, msg='forward')
 
-        t_bwd = self._round(t_grad)
-        m_bwd = self._round(m_grad)
+        t_bwd = t_grad
+        m_bwd = m_grad
         self.assertEqual(len(t_grad), len(m_grad), msg='backward_len')
-        self.assertListEqual(t_bwd, m_bwd, msg='backward_len')
+        self.assertTrue(check_arr(t_bwd, m_bwd, tol=1e-4), msg='backward')
 
     @parameterized.expand([
         (2, 1, 'identity'),
         (1, 5, 'identity'),
         (3, 4, 'identity'),
         (24, 32, 'identity'),
-
+        
         (2, 1, 'relu'),
         (1, 5, 'relu'),
         (3, 4, 'relu'),
@@ -93,9 +93,7 @@ class TestNN(unittest.TestCase):
         if activation != 'identity':
             t_out = getattr(t_out, activation)()
         t_out = sum(t_out)
-        # must reduce to scalar to enable backward.
-        t_out.backward()
-            
+        t_out.backward()  # must reduce to scalar to enable backward.
         
         m_neurons = [Neuron(size=size_in, activation=activation) for _ in range(size_out)]
         self.assertEqual(len(m_neurons), len(w))
@@ -107,17 +105,14 @@ class TestNN(unittest.TestCase):
         m_out = sum(m_out)
         m_out.backward()
         
-        self.assertAlmostEqual(t_out.item(), m_out.data, places=self.FP_PRECISION, msg='forward')
+        self.assertAlmostEqual(t_out.item(), m_out.data, places=4, msg='forward')
 
-        t_w_bwd = self._round(t_lin.weight.grad.ravel().tolist())
-        m_w_bwd = self._round([w.grad for n in m_lin._neurons for w in n._w])
+        t_w_bwd = t_lin.weight.grad.ravel().tolist()
+        m_w_bwd = [w.grad for n in m_lin._neurons for w in n._w]
         self.assertEqual(len(t_w_bwd), len(m_w_bwd), msg='w_backward_len')
-        self.assertListEqual(t_w_bwd, m_w_bwd, msg='w_backward')
+        self.assertTrue(check_arr(t_w_bwd, m_w_bwd, tol=1e-4), msg='w_backward')
 
-        t_b_bwd = self._round(t_lin.bias.grad.ravel().tolist())
-        m_b_bwd = self._round([n._b.grad for n in m_lin._neurons])
+        t_b_bwd = t_lin.bias.grad.ravel().tolist()
+        m_b_bwd = [n._b.grad for n in m_lin._neurons]
         self.assertEqual(len(t_b_bwd), len(m_b_bwd), msg='b_backward_len')
-        self.assertListEqual(t_b_bwd, m_b_bwd, msg='b_backward')
-
-    def _round(self, x):
-        return [round(v, self.FP_PRECISION) for v in x]
+        self.assertTrue(check_arr(t_b_bwd, m_b_bwd, tol=1e-4), msg='b_backward')

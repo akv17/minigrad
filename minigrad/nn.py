@@ -40,7 +40,22 @@ class Neuron:
 
 
 class Linear:
-    
+
+    @classmethod
+    def from_torch(cls, module, activation='identity', name=None):
+        size_out = module.weight.data.shape[0]
+        size_in = module.weight.data.shape[1]
+        ob = cls(size_in=size_in, size_out=size_out, activation=activation, name=name)
+        w = module.weight.data
+        b = module.bias.data
+        neurons = []
+        for i, (wi, bi) in enumerate(zip(w, b)):
+            neuron = Neuron(size=size_in, activation=activation, name=f'neuron{i}@{ob.name}')
+            neuron.initialize(w=wi.tolist(), b=bi.item())
+            neurons.append(neuron)
+        ob.initialize(neurons)
+        return ob
+
     def __init__(self, size_in, size_out, activation='identity', name=None):
         self.size_in = size_in
         self.size_out = size_out
@@ -69,6 +84,6 @@ class Linear:
                 )
                 for i in range(self.size_in)
             ]
-
+    
     def parameters(self):
         return [p for n in self._neurons for p in n.parameters()]
