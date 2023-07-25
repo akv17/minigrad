@@ -1,4 +1,4 @@
-class Value:
+class Node:
 
     def __init__(self, data, name=None, _op=None, _children=None):
         self.data = data
@@ -10,10 +10,10 @@ class Value:
         self._op = _op
     
     def __repr__(self):
-        return f'Value(data={self.data}, name={self.name}, op={self._op})'
+        return f'Node(data={self.data}, name={self.name}, op={self._op})'
     
     def __add__(self, other):
-        out = Value(data=self.data + other.data, _children=(self, other), _op='add')
+        out = Node(data=self.data + other.data, _children=(self, other), _op='add')
         
         def _backward():
             self.grad += 1.0 * out.grad
@@ -23,7 +23,7 @@ class Value:
         return out
     
     def __mul__(self, other):
-        out = Value(data=self.data * other.data, _children=(self, other), _op='mul')
+        out = Node(data=self.data * other.data, _children=(self, other), _op='mul')
         
         def _backward():
             self.grad += other.data * out.grad
@@ -51,11 +51,11 @@ class Value:
 
 
 def f():
-    x1 = Value(2.0, name='x1')
-    x2 = Value(0.0, name='x2')
+    x1 = Node(2.0, name='x1')
+    x2 = Node(0.0, name='x2')
 
-    w1 = Value(0.2, name='w1')
-    w2 = Value(0.3, name='w2')
+    w1 = Node(0.2, name='w1')
+    w2 = Node(0.3, name='w2')
 
     u1 = x1 * w1
     u1.name = 'u1'
@@ -63,7 +63,7 @@ def f():
     u2 = x2 * w2
     u2.name = 'u2'
 
-    b = Value(0.5, name='b')
+    b = Node(0.5, name='b')
 
     z = u1 + u2
     z.name = 'z'
@@ -74,8 +74,8 @@ def f():
 
 
 def f2():
-    a = Value(-2.0, name='a')
-    b = Value(3.0, name='b')
+    a = Node(-2.0, name='a')
+    b = Node(3.0, name='b')
     d = a * b
     d.name = 'd'
     e = a + b
@@ -85,7 +85,7 @@ def f2():
     return f
 
 
-def draw(value):
+def draw(node):
     import tempfile
     import graphviz
     from PIL import Image
@@ -93,7 +93,7 @@ def draw(value):
     dot = graphviz.Digraph()
     dot.format = 'png'
     
-    nodes = [value]
+    nodes = [node]
     visited = set()
     while nodes:
         node = nodes.pop(0)
@@ -122,9 +122,9 @@ def draw(value):
 
 
 def main():
-    v = f()
-    v.backward()
-    draw(v)
+    n = f()
+    n.backward()
+    draw(n)
 
 
 if __name__ == '__main__':
