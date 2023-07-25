@@ -45,7 +45,7 @@ def f3():
 
 
 def main():
-    n = f3()
+    n = f()
     n.backward()
     n.show()
 
