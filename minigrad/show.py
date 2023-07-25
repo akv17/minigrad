@@ -16,11 +16,11 @@ def show_graph(node):
         visited.add(node.name)
         op = node._op
         op_key = f'_op_{node.name}'
-        dot.node(node.name, f'{node.name}\ndata={node.data}\ngrad={node.grad}', shape='box')
+        dot.node(node.name, f'{node.name}\ndata={node.data:.4f}\ngrad={node.grad:.4f}', shape='box')
         if op is not None:
             dot.node(op_key, op)
         for ch in node._children:
-            dot.node(ch.name, f'{ch.name}\ndata={ch.data}\ngrad={ch.grad}', shape='box')
+            dot.node(ch.name, f'{ch.name}\ndata={ch.data:4f}\ngrad={ch.grad:.4f}', shape='box')
             nodes.append(ch)
             if op is not None:
                 dot.edge(ch.name, op_key)

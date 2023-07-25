@@ -45,7 +45,6 @@ class TestOps(unittest.TestCase):
         ('sigmoid:2', 'sigmoid', 0.99),
         ('sigmoid:3', 'sigmoid', 13.45),
         ('sigmoid:4', 'sigmoid', -54.0121),
-
     ])
     def test_unary_op(self, name, op, x, *args):
         t_x = torch.tensor(x, requires_grad=True, dtype=torch.float64)

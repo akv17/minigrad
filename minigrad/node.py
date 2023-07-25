@@ -1,12 +1,12 @@
 import math
-from uuid import uuid4
+from .util import uid
 
 
 class Node:
 
     def __init__(self, data, name=None, _op=None, _children=None):
         self.data = data
-        self.name = name or f'@{str(uuid4())[:8]}'
+        self.name = name or f'node@{uid()}'
         self.grad = 0.0
 
         self._backward = lambda: None
@@ -14,7 +14,7 @@ class Node:
         self._op = _op
     
     def __repr__(self):
-        return f'Node(data={self.data}, name={self.name}, op={self._op})'
+        return f'Node(data={self.data:.4f}, name={self.name}, op={self._op})'
     
     def __add__(self, other):
         other = self._maybe_wrap_with_node(other)
@@ -100,6 +100,15 @@ class Node:
         def _backward():
             self.grad += data * (1 - data) * out.grad
         
+        out._backward = _backward
+        return out
+
+    def identity(self):
+        out = Node(data=self.data, _children=(self,), _op='identity')
+
+        def _backward():
+            self.grad += out.grad
+
         out._backward = _backward
         return out
 
