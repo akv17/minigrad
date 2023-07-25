@@ -80,8 +80,6 @@ class TestNN(unittest.TestCase):
         (1, 5, 'sigmoid'),
         (3, 4, 'sigmoid'),
         (24, 32, 'sigmoid'),
-
-
     ])
     def test_linear(self, size_in, size_out, activation):
         t_lin = torch.nn.Linear(size_in, size_out)
@@ -113,8 +111,13 @@ class TestNN(unittest.TestCase):
 
         t_w_bwd = self._round(t_lin.weight.grad.ravel().tolist())
         m_w_bwd = self._round([w.grad for n in m_lin._neurons for w in n._w])
-        self.assertEqual(len(t_w_bwd), len(m_w_bwd), msg='backward_len')
-        self.assertListEqual(t_w_bwd, m_w_bwd, msg='backward')
+        self.assertEqual(len(t_w_bwd), len(m_w_bwd), msg='w_backward_len')
+        self.assertListEqual(t_w_bwd, m_w_bwd, msg='w_backward')
+
+        t_b_bwd = self._round(t_lin.bias.grad.ravel().tolist())
+        m_b_bwd = self._round([n._b.grad for n in m_lin._neurons])
+        self.assertEqual(len(t_b_bwd), len(m_b_bwd), msg='b_backward_len')
+        self.assertListEqual(t_b_bwd, m_b_bwd, msg='b_backward')
 
     def _round(self, x):
         return [round(v, self.FP_PRECISION) for v in x]
