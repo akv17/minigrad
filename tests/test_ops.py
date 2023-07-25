@@ -84,3 +84,33 @@ class TestOps(unittest.TestCase):
         self.assertAlmostEqual(t_c.item(), m_c.data, places=self.FP_PRECISION, msg='data')
         self.assertAlmostEqual(t_a.grad.item(), m_a.grad, places=self.FP_PRECISION, msg='a_grad')
         self.assertAlmostEqual(t_b.grad.item(), m_b.grad, places=self.FP_PRECISION, msg='b_grad')
+
+    @parameterized.expand([
+        ('add', '__add__', 2.0, 3.0),
+        ('mul', '__mul__', 2.0, 0.0),
+        ('div', '__truediv__', 2.0, 3.0),
+    ])
+    def test_binary_op_with_constant(self, name, op, a, c):
+        t_a = torch.tensor(a, requires_grad=True, dtype=torch.float64)
+        t_c = getattr(t_a, op)(c)
+        t_c.backward()
+
+        m_a = Node(a, 'a')
+        m_c = getattr(m_a, op)(c)
+        m_c.backward()
+        self.assertAlmostEqual(m_c.grad, 1.0, places=self.FP_PRECISION)
+        self.assertAlmostEqual(t_c.item(), m_c.data, places=self.FP_PRECISION, msg='data')
+        self.assertAlmostEqual(t_a.grad.item(), m_a.grad, places=self.FP_PRECISION, msg='a_grad')
+
+    @parameterized.expand([
+        ('add', 2.0, 3.0),
+        ('mul', 2.0, 0.0),
+    ])
+    def test_rdunders(self, name, a, c):
+        m_a = Node(a, 'a')
+        if name == 'add':
+            self.assertEqual((c + m_a).data, c + m_a.data)
+        elif name == 'mul':
+            self.assertEqual((c * m_a).data, c * m_a.data)
+        else:
+            raise NotImplementedError

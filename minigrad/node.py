@@ -17,6 +17,7 @@ class Node:
         return f'Node(data={self.data}, name={self.name}, op={self._op})'
     
     def __add__(self, other):
+        other = self._maybe_wrap_with_node(other)
         out = Node(data=self.data + other.data, _children=(self, other), _op='add')
         
         def _backward():
@@ -27,6 +28,7 @@ class Node:
         return out
     
     def __mul__(self, other):
+        other = self._maybe_wrap_with_node(other)
         out = Node(data=self.data * other.data, _children=(self, other), _op='mul')
         
         def _backward():
@@ -37,6 +39,7 @@ class Node:
         return out
 
     def __truediv__(self, other):
+        other = self._maybe_wrap_with_node(other)
         out = self * (other ** -1)
         return out
 
@@ -49,6 +52,12 @@ class Node:
         
         out._backward = _backward
         return out
+    
+    __radd__ = __add__
+    
+    __rmul__ = __mul__
+    
+    __rtruediv__ = __truediv__
     
     def exp(self):
         data = math.exp(self.data)
@@ -114,3 +123,7 @@ class Node:
     def show(self):
         from .show import show_graph
         show_graph(self)
+
+    def _maybe_wrap_with_node(self, other):
+        other = Node(other) if not isinstance(other, type(self)) else other
+        return other
