@@ -1,8 +1,11 @@
+from uuid import uuid4
+
+
 class Node:
 
     def __init__(self, data, name=None, _op=None, _children=None):
         self.data = data
-        self.name = name
+        self.name = name or f'@{str(uuid4())[:8]}'
         self.grad = 0.0
 
         self._backward = lambda: None
@@ -30,6 +33,20 @@ class Node:
             other.grad += self.data * out.grad
         
         out._backward = _backward
+        return out
+
+    def __pow__(self, value):
+        out = Node(data=self.data ** value, _children=(self,), _op='pow')
+        
+        def _backward():
+            n = value
+            self.grad += (n * self.data ** (n-1)) *  out.grad
+        
+        out._backward = _backward
+        return out
+
+    def __truediv__(self, other):
+        out = self * (other ** -1)
         return out
 
     def backward(self):
