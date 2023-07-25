@@ -36,8 +36,16 @@ def f2():
     return f
 
 
+def f3():
+    a = Node(6.0, 'a')
+    b = Node(2.0, 'b')
+    c = a / b
+    c.name = 'c'
+    return c
+
+
 def main():
-    n = f()
+    n = f3()
     n.backward()
     n.show()
 
