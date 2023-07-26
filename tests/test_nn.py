@@ -8,8 +8,8 @@ try:
 except ImportError:
     raise ImportError('PyTorch required to run tests')
 
-from minigrad.node import Node
-from minigrad.nn import Neuron, Linear, Softmax
+from scalargrad.node import Node
+from scalargrad.nn import Neuron, Linear, Softmax
 from tests.util import check_arr
 
 

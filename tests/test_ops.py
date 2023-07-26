@@ -6,7 +6,7 @@ try:
 except ImportError:
     raise ImportError('PyTorch required to run tests')
 
-from minigrad.node import Node
+from scalargrad.node import Node
 
 
 class TestOps(unittest.TestCase):
