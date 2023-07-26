@@ -1,4 +1,5 @@
 import math
+
 from .util import uid
 
 
@@ -130,7 +131,7 @@ class Node:
             node._backward()
 
     def show(self):
-        from .show import show_graph
+        from .util import show_graph
         show_graph(self)
 
     def _maybe_wrap_with_node(self, other):

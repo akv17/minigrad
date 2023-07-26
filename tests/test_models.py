@@ -8,8 +8,7 @@ try:
 except ImportError:
     raise ImportError('PyTorch required to run tests')
 
-from minigrad.nn import Linear
-from minigrad.models import Sequential
+from minigrad.nn import Linear, Sequential
 from tests.util import check_arr
 
 
