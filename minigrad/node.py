@@ -1,6 +1,9 @@
+import sys
 import math
 
 from .util import uid
+
+sys.setrecursionlimit(10000)
 
 
 class Node:
@@ -41,7 +44,19 @@ class Node:
 
     def __truediv__(self, other):
         other = self._maybe_wrap_with_node(other)
-        out = self * (other ** -1)
+        out = Node(data=self.data / other.data, _children=(self, other), _op='div')
+        
+        def _backward():
+            # f = a / b = a * 1 / b
+            # da/df = 1 / b
+            # db/df = -a / b**2 
+            # g = 1 / b
+            # db/dg = b * 0 - 1 * 1 / b**2
+            # db/dg = -1 / b**2
+            self.grad += 1.0 / other.data * out.grad
+            other.grad += -self.data / (other.data ** 2) * out.grad
+
+        out._backward = _backward
         return out
 
     def __pow__(self, value):
@@ -129,6 +144,10 @@ class Node:
         _traverse(self)
         for node in reversed(nodes_sorted):
             node._backward()
+
+    def set_name(self, name):
+        self.name = name
+        return self
 
     def show(self):
         from .util import show_graph

@@ -116,3 +116,39 @@ class Sequential:
 
     def parameters(self):
         return [p for m in self.modules for p in m.parameters()]
+
+
+class Softmax:
+
+    def __init__(self, name=None):
+        self.name = name or f'softmax@{uid()}'
+
+    def __repr__(self):
+        return f'Softmax(name={self.name})'
+
+    def __call__(self, x):
+        assert isinstance(x, list)
+        assert x
+        call_id = uid()
+        exps = [xi.exp().set_name(f'exp{i}@{call_id}@{self.name}') for i, xi in enumerate(x)]
+        norm = sum(exps).set_name(f'norm@{call_id}@{self.name}')
+        x = [(ei / norm).set_name(f'out{i}@{call_id}@{self.name}') for i, ei in enumerate(exps)]
+        return x
+
+    def initialize():
+        pass
+
+    def parameters():
+        pass
+
+
+class CrossEntropyLoss:
+
+    def __init__(self, name=None):
+        self.name = name or f'cross-entropy@{uid()}'
+
+    def __repr__(self):
+        return f'CrossEntropyLoss(name={self.name})'
+
+    def __call__(self, outputs, targets):
+        pass
