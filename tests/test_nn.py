@@ -9,7 +9,7 @@ except ImportError:
     raise ImportError('PyTorch required to run tests')
 
 from scalargrad.node import Node
-from scalargrad.nn import Neuron, Linear, Softmax, CrossEntropyLoss
+from scalargrad.nn import Neuron, Linear, Softmax, CrossEntropyLoss, SGD
 from tests.util import check_arr
 
 
@@ -172,3 +172,47 @@ class TestNN(unittest.TestCase):
         m_bwd = [n.grad for out in m_outputs for n in out]
         self.assertTrue(check_arr(t_bwd, m_bwd, tol=1e-4, show_diff=True))
 
+    @parameterized.expand([
+        (4, 0.1, None, 1),
+        (4, 0.1, None, 4),
+        (4, 0.001, None, 1),
+        (4, 0.001, None, 4),
+
+        (4, 0.1, 0.9, 1),
+        (4, 0.1, 0.9, 4),
+        (4, 0.001, 0.9, 1),
+        (4, 0.001, 0.9, 4),
+
+        (512, 0.1, None, 1),
+        (512, 0.1, None, 4),
+        (512, 0.001, None, 1),
+        (512, 0.001, None, 4),
+
+        (512, 0.1, 0.9, 1),
+        (512, 0.1, 0.9, 4),
+        (512, 0.001, 0.9, 1),
+        (512, 0.001, 0.9, 4),
+    ])
+    def test_sgd(self, num_params, lr, momentum, num_steps):
+        params = torch.rand((num_params,), dtype=torch.float64).tolist()
+
+        t_params = torch.tensor(params, dtype=torch.float64, requires_grad=True)
+        t_sgd = torch.optim.SGD([t_params], lr=lr, momentum=momentum or 0.0)
+        for _ in range(num_steps):
+            t_sgd.zero_grad()
+            t_out = t_params.exp().sum()
+            t_out.backward()
+            t_sgd.step()
+        t_params_final = t_params.ravel().tolist()
+
+        m_params = [Node(v) for v in params]
+        m_sgd = SGD(parameters=m_params, lr=lr, momentum=momentum)
+        for _ in range(num_steps):
+            m_sgd.zero_grad()
+            m_out = sum([p.exp() for p in m_params])
+            m_out.backward()
+            m_sgd.step()
+        m_params_final = [p.data for p in m_params]
+
+        self.assertEqual(len(t_params_final), len(m_params_final), msg='len')
+        self.assertTrue(check_arr(t_params_final, m_params_final, tol=1e-4, show_diff=True), 'params')
