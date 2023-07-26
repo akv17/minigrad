@@ -9,7 +9,7 @@ except ImportError:
     raise ImportError('PyTorch required to run tests')
 
 from scalargrad.node import Node
-from scalargrad.nn import Neuron, Linear, Softmax
+from scalargrad.nn import Neuron, Linear, Softmax, CrossEntropyLoss
 from tests.util import check_arr
 
 
@@ -143,3 +143,31 @@ class TestNN(unittest.TestCase):
         t_bwd = t_inp.grad.ravel().tolist()
         m_bwd = [n.grad for n in m_inp]
         self.assertTrue(check_arr(t_bwd, m_bwd, tol=1e-4, show_diff=True))
+
+    @parameterized.expand([
+        (4, 2),
+        (8, 4),
+        (32, 16),
+        (64, 128),
+        (256, 128),
+    ])
+    def test_cross_entropy_loss(self, num_samples, num_classes):
+        t_outputs = torch.rand((num_samples, num_classes), dtype=torch.float64, requires_grad=True)
+        t_targets = torch.randint(0, num_classes, size=(num_samples,), dtype=torch.int64, requires_grad=False)
+
+        outputs = t_outputs.tolist()
+        targets = t_targets.tolist()
+
+        t_out = torch.nn.CrossEntropyLoss()(t_outputs, t_targets)
+        t_out.backward()
+
+        m_outputs = [[Node(v) for v in out] for out in outputs]
+        m_targets = targets
+        m_out = CrossEntropyLoss()(m_outputs, m_targets)
+        m_out.backward()
+
+        self.assertAlmostEqual(t_out.item(), m_out.data, places=4, msg='forward')
+        t_bwd = [v.item() for v in t_outputs.grad.ravel()]
+        m_bwd = [n.grad for out in m_outputs for n in out]
+        self.assertTrue(check_arr(t_bwd, m_bwd, tol=1e-4, show_diff=True))
+

@@ -132,7 +132,7 @@ class Softmax:
         call_id = uid()
         exps = [xi.exp().set_name(f'exp{i}@{call_id}@{self.name}') for i, xi in enumerate(x)]
         norm = sum(exps).set_name(f'norm@{call_id}@{self.name}')
-        x = [(ei / norm).set_name(f'out{i}@{call_id}@{self.name}') for i, ei in enumerate(exps)]
+        x = [(ei / norm).set_name(f'prob{i}@{call_id}@{self.name}') for i, ei in enumerate(exps)]
         return x
 
     def initialize():
@@ -146,9 +146,27 @@ class CrossEntropyLoss:
 
     def __init__(self, name=None):
         self.name = name or f'cross-entropy@{uid()}'
+        self.softmax = Softmax()
 
     def __repr__(self):
         return f'CrossEntropyLoss(name={self.name})'
 
     def __call__(self, outputs, targets):
+        assert outputs
+        assert len(outputs) == len(targets)
+        assert len(set(len(o) for o in outputs)) == 1  # same number of classes for each output.
+        call_id = uid()
+        logs = []
+        for i, (out, target) in enumerate(zip(outputs, targets)):
+            out = self.softmax(out)
+            pred = out[target]
+            log = pred.log().set_name(f'log{i}@{call_id}@{self.name}')
+            logs.append(log)
+        loss = (-1.0 * (sum(logs) / len(logs))).set_name(f'loss@{call_id}@{self.name}')
+        return loss
+
+    def initialize():
+        pass
+
+    def parameters():
         pass
