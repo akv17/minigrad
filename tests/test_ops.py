@@ -68,6 +68,9 @@ class TestOps(unittest.TestCase):
         ('mul:2', '__mul__', 28.42, -12.11),
         
         ('div:0', '__truediv__', 4.0, 2.0),
+        ('div:1', '__truediv__', 1.0, 3.0),
+        ('div:2', '__truediv__', 0.532, -1.2432),
+        ('div:3', '__truediv__', 0.0, -1.2432),
     ])
     def test_binary_op(self, name, op, a, b):
         t_a = torch.tensor(a, requires_grad=True, dtype=torch.float64)

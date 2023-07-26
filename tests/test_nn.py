@@ -8,7 +8,8 @@ try:
 except ImportError:
     raise ImportError('PyTorch required to run tests')
 
-from minigrad.nn import Neuron, Linear
+from minigrad.node import Node
+from minigrad.nn import Neuron, Linear, Softmax
 from tests.util import check_arr
 
 
@@ -116,3 +117,29 @@ class TestNN(unittest.TestCase):
         m_b_bwd = [n._b.grad for n in m_lin._neurons]
         self.assertEqual(len(t_b_bwd), len(m_b_bwd), msg='b_backward_len')
         self.assertTrue(check_arr(t_b_bwd, m_b_bwd, tol=1e-4), msg='b_backward')
+
+    @parameterized.expand([
+        (1,),
+        (2,),
+        (8,),
+        (32,),
+        (128,),
+        (1024,),
+    ])
+    def test_softmax(self, size):
+        inp = torch.rand((size,), dtype=torch.float64).tolist()
+
+        t_inp = torch.tensor(inp, dtype=torch.float64, requires_grad=True)
+        t_out = t_inp.softmax(0).sum()
+        t_out.backward()
+
+        m_inp = [Node(v, name=f'inp{i}') for i, v in enumerate(inp)]
+        m_out = Softmax()
+        m_out = m_out(m_inp)
+        m_out = sum(m_out)
+        m_out.backward()
+
+        self.assertAlmostEqual(t_out.item(), m_out.data, places=4, msg='forward')
+        t_bwd = t_inp.grad.ravel().tolist()
+        m_bwd = [n.grad for n in m_inp]
+        self.assertTrue(check_arr(t_bwd, m_bwd, tol=1e-4, show_diff=True))
