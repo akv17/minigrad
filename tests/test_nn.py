@@ -145,6 +145,7 @@ class TestNN(unittest.TestCase):
         self.assertTrue(check_arr(t_bwd, m_bwd, tol=1e-4, show_diff=True))
 
     @parameterized.expand([
+        (4, 1),
         (4, 2),
         (8, 4),
         (32, 16),
@@ -161,7 +162,7 @@ class TestNN(unittest.TestCase):
         t_out = torch.nn.CrossEntropyLoss()(t_outputs, t_targets)
         t_out.backward()
 
-        m_outputs = [[Node(v) for v in out] for out in outputs]
+        m_outputs = [[Node(v, name=f'inp{i}_{j}') for j, v in enumerate(out)] for i, out in enumerate(outputs)]
         m_targets = targets
         m_out = CrossEntropyLoss()(m_outputs, m_targets)
         m_out.backward()
