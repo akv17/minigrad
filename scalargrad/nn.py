@@ -30,9 +30,9 @@ class Neuron:
     def initialize(self, w=None, b=None):
         if w is not None:
             assert len(w) == self.size
-        w = w or [random.uniform(-1.0, 1.0) for _ in range(self.size)]
+        w = w or [random.uniform(-0.01, 0.01) for _ in range(self.size)]
         self._w = [Node(wi, name=f'w{i}@{self.name}') for i, wi in enumerate(w)]
-        b = b or random.uniform(-1.0, 1.0)
+        b = b or random.uniform(-0.01, 0.01)
         self._b = Node(b, name=f'b@{self.name}')
 
     def parameters(self):
@@ -82,7 +82,7 @@ class Linear:
                     activation=self.activation,
                     name=f'neuron{i}@{self.name}'
                 )
-                for i in range(self.size_in)
+                for i in range(self.size_out)
             ]
     
     def parameters(self):
@@ -91,7 +91,7 @@ class Linear:
 
 class Sequential:
 
-    def __init__(self, modules, name=None, do_initialize=True):
+    def __init__(self, modules, name=None, do_initialize=False):
         self.modules = modules
         self.name = name or f'sequential@{uid()}'
         if do_initialize:
