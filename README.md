@@ -37,9 +37,9 @@ print(f'df/dw1: {w1.grad}')
 ```
 Output:
 ```bash
-forward: 0.61
-df/dw0: 0.1
-df/dw1: 0.2
+>>> forward: 0.61
+>>> df/dw0: 0.1
+>>> df/dw1: 0.2
 ```
 ![image](examples/linear.png)
 
