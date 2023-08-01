@@ -1,8 +1,6 @@
 import logging
 import random
 
-from .nn import Softmax
-
 
 class Trainer:
 
@@ -38,7 +36,6 @@ class Trainer:
             ch.setFormatter(formatter)
             logger.addHandler(ch)
             self.logger = logger
-
     
     def run(self):
         self.logger.info('Training...')
@@ -60,35 +57,59 @@ class Trainer:
     
     def _on_epoch_end(self, epoch):
         loss = sum(self.losses) / len(self.losses)
-        self.logger.info(f'Epoch: {epoch}/{self.num_epochs}    Loss: {loss:.4f}')
+        
+        if self.evaluator is not None:
+            score = self.evaluator.run()
+            self.logger.info(f'Epoch: {epoch}/{self.num_epochs}    Loss: {loss:.8f}    {self.evaluator.metric.NAME}: {score:.4f}')
+        else:
+            self.logger.info(f'Epoch: {epoch}/{self.num_epochs}    Loss: {loss:.8f}')
 
-        if self.evaluator is None:
-            return
-        self.logger.info('evaluating...')
-        softmax = Softmax()
-        outputs = []
-        targets = []
-        for x, y in self._iter_batches(self.dataset_val):
-            for xi, yi in zip(x, y):
-                pred = softmax(self.model(xi))
-                pred = [p.data for p in pred]
-                outputs.append(pred)
-                targets.append(yi)
+
+class Evaluator:
+
+    def __init__(
+        self,
+        x,
+        y,
+        model,
+        metric,
+    ):
+        self.x = x
+        self.y = y
+        self.model = model
+        self.metric = metric
+        self.logger = None
+    
+    def run(self):
+        outputs = [self.model(xi) for xi in self.x]
+        targets = self.y
         score = self.metric(outputs, targets)
-        self.logger.info(f'score: {score}')
-        self.optimizer.zero_grad()
+        return score
 
 
 class AccuracyMetric:
+    NAME = 'Accuracy'
 
     def __call__(self, outputs, targets):
         assert len(outputs) == len(targets)
         scores = []
         for oi, ti in zip(outputs, targets):
+            oi = [n.data for n in oi]
             pi = max(oi)
             pi = oi.index(pi)
             score = int(int(pi) == int(ti))
             scores.append(score)
+        score = sum(scores) / len(scores)
+        return score
+
+
+class MSEMetric:
+    NAME = 'MSE'
+
+    def __call__(self, outputs, targets):
+        assert len(outputs) == len(targets)
+        assert set(len(o) for o in outputs) == {1}
+        scores = [((oi[0].data - ti) ** 2) for oi, ti in zip(outputs, targets)]
         score = sum(scores) / len(scores)
         return score
 
