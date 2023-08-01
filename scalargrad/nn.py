@@ -172,6 +172,32 @@ class CrossEntropyLoss:
         pass
 
 
+class MSELoss:
+
+    def __init__(self, name=None):
+        self.name = name or f'mse@{uid()}'
+
+    def __repr__(self):
+        return f'MSELoss(name={self.name})'
+
+    def __call__(self, outputs, targets):
+        assert outputs
+        assert len(outputs) == len(targets)
+        call_id = uid()
+        losses = [
+            ((out - target) ** 2  ).set_name(f'loss{i}@{call_id}@{self.name}')
+            for i, (out, target) in enumerate(zip(outputs, targets))
+        ]
+        loss = (sum(losses) / len(losses)).set_name(f'loss@{call_id}@{self.name}')
+        return loss
+
+    def initialize():
+        pass
+
+    def parameters():
+        pass
+
+
 class SGD:
     
     def __init__(self, parameters, lr, momentum=None, name=None):
