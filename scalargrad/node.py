@@ -1,5 +1,4 @@
 import sys
-import math
 
 from .scalar import Scalar as _S
 from .util import uid
