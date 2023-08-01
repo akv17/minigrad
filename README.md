@@ -3,7 +3,7 @@
 It implements forward and backward passes over dynamic computional graphs of scalars in pure python.  
 
 `scalargrad` is solely an educational project.  
-It should not be considered as an autograd engine to actually train your networks with.    
+It should not be considered as an autograd engine to actually train any networks with.    
 It's just a playground to explore and better understand the machinery of backprogation for training neural networks.
 
 This project is heavily inspired by [micrograd](https://github.com/karpathy/micrograd) by Andrej Karpathy.
@@ -115,7 +115,7 @@ Typically that node would be the value of your loss function.
 - Backprogation through arbitrary computational graph
 - PyTorch-like API
 - Pure Python3 implementation without any dependencies
-- Tested against PyTorch (requires `torch` and `parameterized`)
+- Tested against PyTorch (requires `torch`, `numpy` and `parameterized`)
 - Computational graph visualization (requires `graphviz` and `pillow`)
 
 # Modules
@@ -142,7 +142,7 @@ I also recommend installing CPU-only build of torch via `pip install torch --ind
 
 # Testing
 `scalargrad` forward and backward implementations are heavily tested against PyTorch.  
-As a consequence `torch` and `parameterized` are required for testing.  
+As a consequence `torch`, `numpy` and `parameterized` are required for testing.  
 
 ### Examples:
 - Test core ops and NN modules (fast): `python -m unittest discover -v tests/core`
