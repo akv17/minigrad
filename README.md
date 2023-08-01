@@ -115,8 +115,8 @@ Typically that node would be the value of your loss function.
 - Backprogation through arbitrary computational graph
 - PyTorch-like API
 - Pure Python3 implementation without any dependencies
-- Tested against PyTorch (requires `torch`, `numpy` and `parameterized`)
-- Computational graph visualization (requires `graphviz` and `pillow`)
+- Tested against PyTorch (requires third-party dependencies)
+- Computational graph visualization (requires third-party dependencies)
 
 # Modules
 `scalargrad` implements common NN modules:
@@ -147,3 +147,8 @@ As a consequence `torch`, `numpy` and `parameterized` are required for testing.
 ### Examples:
 - Test core ops and NN modules (fast): `python -m unittest discover -v tests/core`
 - Test training (very slow): `python -m unittest discover -v tests/train`
+
+# Visualization
+Computational grpahs may be visualized by calling `.render()` on a leaf node.    
+This requires dependencies `graphviz` and `Pillow`.  
+Be careful when attempting to visualize large graphs, it's really easy to run out of memory.   
