@@ -183,9 +183,11 @@ class MSELoss:
     def __call__(self, outputs, targets):
         assert outputs
         assert len(outputs) == len(targets)
+        assert set(len(o) for o in outputs) == {1}  # same number of classes for each output.
+        outputs = [out[0] for out in outputs]
         call_id = uid()
         losses = [
-            ((out - target) ** 2  ).set_name(f'loss{i}@{call_id}@{self.name}')
+            ((out - target) ** 2).set_name(f'loss{i}@{call_id}@{self.name}')
             for i, (out, target) in enumerate(zip(outputs, targets))
         ]
         loss = (sum(losses) / len(losses)).set_name(f'loss@{call_id}@{self.name}')
