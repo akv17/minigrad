@@ -1,12 +1,10 @@
 import unittest
 from parameterized import parameterized
 
-try:
-    import torch
-except ImportError:
-    raise ImportError('PyTorch required to run tests')
-
 from scalargrad.node import Node
+from tests.util import require_torch
+
+torch = require_torch()
 
 
 class TestOps(unittest.TestCase):
