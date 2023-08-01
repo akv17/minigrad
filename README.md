@@ -88,19 +88,19 @@ Output:
 ```
 >>> x: [1.0, 1.0]
 >>> y: 1
->>> pred: [0.33366935620417804, 0.6663306437958219]
+>>> pred: [0.0023424001473020847, 0.997657599852698]
 
 >>> x: [0.0, 1.0]
 >>> y: 0
->>> pred: [0.33366935620417804, 0.6663306437958219]
+>>> pred: [0.9966527803688605, 0.003347219631139429]
 
 >>> x: [1.0, 0.0]
 >>> y: 0
->>> pred: [0.9984033656965609, 0.0015966343034391618]
+>>> pred: [0.9965988144771889, 0.003401185522811088]
 
 >>> x: [0.0, 0.0]
 >>> y: 1
->>> pred: [0.33366935620417804, 0.6663306437958219]
+>>> pred: [0.014056726645726948, 0.9859432733542731]
 ```
 # Overview
 `scalargrad` builds and executes computational graphs of scalars.  
@@ -142,7 +142,7 @@ I also recommend installing CPU-only build of torch via `pip install torch --ind
 
 # Testing
 `scalargrad` forward and backward implementations are heavily tested against PyTorch.  
-As a consequence `torch` is required for testing.  
+As a consequence `torch` and `parameterized` are required for testing.  
 
 ### Examples:
 - Test core ops and NN modules (fast): `python -m unittest discover -v tests/core`
