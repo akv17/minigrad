@@ -161,9 +161,9 @@ class Node:
         nodes_sorted = []
 
         def _traverse(node):
-            if node.name in visited:
+            if id(node) in visited:
                 return
-            visited.add(node.name)
+            visited.add(id(node))
             for ch in node._children:
                 _traverse(ch)
             nodes_sorted.append(node)
