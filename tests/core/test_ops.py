@@ -1,7 +1,7 @@
 import unittest
 from parameterized import parameterized
 
-from scalargrad.node import Node
+from scalargrad.scalar import Scalar
 from tests.util import require_torch
 
 torch = require_torch()
@@ -53,7 +53,7 @@ class TestOps(unittest.TestCase):
         t_c = getattr(t_x, op)(*args)
         t_c.backward()
 
-        m_x = Node(x, 'x')
+        m_x = Scalar(x, 'x')
         m_c = getattr(m_x, op)(*args)
         m_c.backward()
         self.assertAlmostEqual(1.0, m_c.grad, places=self.FP_PRECISION)
@@ -85,8 +85,8 @@ class TestOps(unittest.TestCase):
         t_c = getattr(t_a, op)(t_b)
         t_c.backward()
 
-        m_a = Node(a, 'a')
-        m_b = Node(b, 'b')
+        m_a = Scalar(a, 'a')
+        m_b = Scalar(b, 'b')
         m_c = getattr(m_a, op)(m_b)
         m_c.backward()
         self.assertAlmostEqual(m_c.grad, 1.0, places=self.FP_PRECISION)
@@ -104,7 +104,7 @@ class TestOps(unittest.TestCase):
         t_c = getattr(t_a, op)(c)
         t_c.backward()
 
-        m_a = Node(a, 'a')
+        m_a = Scalar(a, 'a')
         m_c = getattr(m_a, op)(c)
         m_c.backward()
         self.assertAlmostEqual(m_c.grad, 1.0, places=self.FP_PRECISION)
@@ -118,7 +118,7 @@ class TestOps(unittest.TestCase):
         ('sub', 2.0, 0.0),
     ])
     def test_rdunders(self, name, a, c):
-        m_a = Node(a, 'a')
+        m_a = Scalar(a, 'a')
         if name == 'add':
             self.assertEqual((c + m_a).data, c + m_a.data)
         elif name == 'mul':

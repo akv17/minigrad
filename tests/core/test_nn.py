@@ -3,7 +3,7 @@ import unittest
 
 from parameterized import parameterized
 
-from scalargrad.node import Node
+from scalargrad.scalar import Scalar
 from scalargrad.nn import Neuron, Linear, Softmax, CrossEntropyLoss, MSELoss, SGD
 from tests.util import check_arr, require_torch
 
@@ -130,7 +130,7 @@ class TestNN(unittest.TestCase):
         t_out = t_inp.softmax(0).sum()
         t_out.backward()
 
-        m_inp = [Node(v, name=f'inp{i}') for i, v in enumerate(inp)]
+        m_inp = [Scalar(v, name=f'inp{i}') for i, v in enumerate(inp)]
         m_out = Softmax()
         m_out = m_out(m_inp)
         m_out = sum(m_out)
@@ -159,7 +159,7 @@ class TestNN(unittest.TestCase):
         t_out = torch.nn.CrossEntropyLoss()(t_outputs, t_targets)
         t_out.backward()
 
-        m_outputs = [[Node(v, name=f'inp{i}_{j}') for j, v in enumerate(out)] for i, out in enumerate(outputs)]
+        m_outputs = [[Scalar(v, name=f'inp{i}_{j}') for j, v in enumerate(out)] for i, out in enumerate(outputs)]
         m_targets = targets
         m_out = CrossEntropyLoss()(m_outputs, m_targets)
         m_out.backward()
@@ -188,7 +188,7 @@ class TestNN(unittest.TestCase):
         t_out = torch.nn.MSELoss()(t_outputs, t_targets)
         t_out.backward()
 
-        m_outputs = [[Node(v, name=f'inp{i}')] for i, v in enumerate(outputs)]
+        m_outputs = [[Scalar(v, name=f'inp{i}')] for i, v in enumerate(outputs)]
         m_targets = targets
         m_out = MSELoss()(m_outputs, m_targets)
         m_out.backward()
@@ -231,7 +231,7 @@ class TestNN(unittest.TestCase):
             t_sgd.step()
         t_params_final = t_params.ravel().tolist()
 
-        m_params = [Node(v) for v in params]
+        m_params = [Scalar(v) for v in params]
         m_sgd = SGD(parameters=m_params, lr=lr, momentum=momentum)
         for _ in range(num_steps):
             m_sgd.zero_grad()

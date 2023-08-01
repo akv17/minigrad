@@ -6,11 +6,11 @@ from .util import uid
 sys.setrecursionlimit(10000)
 
 
-class Node:
+class Scalar:
 
     def __init__(self, data, name=None, _op=None, _children=None):
         self.data = data
-        self.name = name or f'node@{uid()}'
+        self.name = name or f'scalar@{uid()}'
         self.grad = 0.0
 
         self._backward = lambda: None
@@ -18,11 +18,11 @@ class Node:
         self._op = _op
     
     def __repr__(self):
-        return f'Node(data={self.data:.4f}, name={self.name}, op={self._op})'
+        return f'Scalar(data={self.data:.4f}, name={self.name}, op={self._op})'
     
     def __add__(self, other):
-        other = self._maybe_wrap_with_node(other)
-        out = Node(data=self.data + other.data, _children=(self, other), _op='add')
+        other = self._as_scalar(other)
+        out = Scalar(data=self.data + other.data, _children=(self, other), _op='add')
         
         def _backward():
             self.grad += out.grad
@@ -32,8 +32,8 @@ class Node:
         return out
 
     def __sub__(self, other):
-        other = self._maybe_wrap_with_node(other)
-        out = Node(data=self.data - other.data, _children=(self, other), _op='sub')
+        other = self._as_scalar(other)
+        out = Scalar(data=self.data - other.data, _children=(self, other), _op='sub')
         
         def _backward():
             self.grad += out.grad
@@ -43,13 +43,13 @@ class Node:
         return out
 
     def __rsub__(self, other):
-        other = self._maybe_wrap_with_node(other)
+        other = self._as_scalar(other)
         res = other - self
         return res
     
     def __mul__(self, other):
-        other = self._maybe_wrap_with_node(other)
-        out = Node(data=self.data * other.data, _children=(self, other), _op='mul')
+        other = self._as_scalar(other)
+        out = Scalar(data=self.data * other.data, _children=(self, other), _op='mul')
         
         def _backward():
             self.grad += other.data * out.grad
@@ -59,8 +59,8 @@ class Node:
         return out
 
     def __truediv__(self, other):
-        other = self._maybe_wrap_with_node(other)
-        out = Node(data=self.data / other.data, _children=(self, other), _op='div')
+        other = self._as_scalar(other)
+        out = Scalar(data=self.data / other.data, _children=(self, other), _op='div')
         
         def _backward():
             self.grad += 1.0 / other.data * out.grad
@@ -70,11 +70,11 @@ class Node:
         return out
 
     def __rtruediv__(self, other):
-        other = self._maybe_wrap_with_node(other)
+        other = self._as_scalar(other)
         return other / self
 
     def __pow__(self, value):
-        out = Node(data=self.data ** value, _children=(self,), _op='pow')
+        out = Scalar(data=self.data ** value, _children=(self,), _op='pow')
         
         def _backward():
             n = value
@@ -84,7 +84,7 @@ class Node:
         return out
     
     def __neg__(self):
-        out = Node(data=-self.data, _children=(self,), _op='neg')
+        out = Scalar(data=-self.data, _children=(self,), _op='neg')
         
         def _backward():
             self.grad += -out.grad
@@ -98,7 +98,7 @@ class Node:
     
     def exp(self):
         data = math.exp(self.data)
-        out = Node(data=data, _children=(self,), _op='exp')
+        out = Scalar(data=data, _children=(self,), _op='exp')
 
         def _backward():
             self.grad += data * out.grad
@@ -107,7 +107,7 @@ class Node:
         return out
     
     def log(self):
-        out = Node(data=math.log(self.data), _children=(self,), _op='log')
+        out = Scalar(data=math.log(self.data), _children=(self,), _op='log')
 
         def _backward():
             self.grad += 1 / self.data * out.grad
@@ -121,7 +121,7 @@ class Node:
     
     def relu(self):
         data = self.data if self.data > 0.0 else 0.0
-        out = Node(data=data, _children=(self,), _op='relu')
+        out = Scalar(data=data, _children=(self,), _op='relu')
 
         def _backward():
             value = 1.0 if self.data > 0.0 else 0.0
@@ -132,7 +132,7 @@ class Node:
 
     def sigmoid(self):
         data = 1 / (1 + math.exp(-self.data))
-        out = Node(data=data, _children=(self,), _op='sigmoid')
+        out = Scalar(data=data, _children=(self,), _op='sigmoid')
 
         def _backward():
             self.grad += data * (1 - data) * out.grad
@@ -141,7 +141,7 @@ class Node:
         return out
 
     def identity(self):
-        out = Node(data=self.data, _children=(self,), _op='identity')
+        out = Scalar(data=self.data, _children=(self,), _op='identity')
 
         def _backward():
             self.grad += out.grad
@@ -170,10 +170,10 @@ class Node:
         self.name = name
         return self
 
-    def show(self):
-        from .util import show_graph
-        show_graph(self)
+    def render(self):
+        from .util import render_graph
+        render_graph(self)
 
-    def _maybe_wrap_with_node(self, other):
-        other = Node(other) if not isinstance(other, type(self)) else other
+    def _as_scalar(self, other):
+        other = Scalar(other) if not isinstance(other, type(self)) else other
         return other

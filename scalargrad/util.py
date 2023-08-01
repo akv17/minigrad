@@ -8,7 +8,7 @@ def uid():
     return str(uuid4())[:8]
 
 
-def show_graph(node):
+def render_graph(node):
     import graphviz
     dot = graphviz.Digraph()
     dot.format = 'png'
