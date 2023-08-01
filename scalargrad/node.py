@@ -1,6 +1,7 @@
 import sys
 import math
 
+from .scalar import Scalar as _S
 from .util import uid
 
 sys.setrecursionlimit(10000)
@@ -22,29 +23,29 @@ class Node:
     
     def __add__(self, other):
         other = self._maybe_wrap_with_node(other)
-        out = Node(data=self.data + other.data, _children=(self, other), _op='add')
+        out = Node(data=_S(self.data) + _S(other.data), _children=(self, other), _op='add')
         
         def _backward():
-            self.grad += 1.0 * out.grad
-            other.grad += 1.0 * out.grad
+            self.grad = _S(self.grad) + 1.0 * _S(out.grad)
+            other.grad = _S(other.grad) + 1.0 * _S(out.grad)
         
         out._backward = _backward
         return out
     
     def __mul__(self, other):
         other = self._maybe_wrap_with_node(other)
-        out = Node(data=self.data * other.data, _children=(self, other), _op='mul')
+        out = Node(data=_S(self.data) * _S(other.data), _children=(self, other), _op='mul')
         
         def _backward():
-            self.grad += other.data * out.grad
-            other.grad += self.data * out.grad
+            self.grad = _S(self.grad) + _S(other.data) * _S(out.grad)
+            other.grad = _S(other.grad) + _S(self.data) * _S(out.grad)
         
         out._backward = _backward
         return out
 
     def __truediv__(self, other):
         other = self._maybe_wrap_with_node(other)
-        out = Node(data=self.data / other.data, _children=(self, other), _op='div')
+        out = Node(data=_S(self.data) / _S(other.data), _children=(self, other), _op='div')
         
         def _backward():
             # f = a / b = a * 1 / b
@@ -53,18 +54,23 @@ class Node:
             # g = 1 / b
             # db/dg = b * 0 - 1 * 1 / b**2
             # db/dg = -1 / b**2
-            self.grad += 1.0 / other.data * out.grad
-            other.grad += -self.data / (other.data ** 2) * out.grad
+            self.grad = _S(self.grad) + (1.0 / _S(other.data) * _S(out.grad))
+            other.grad = _S(other.grad) + ((-_S(self.data) / (_S(other.data) ** 2)) * _S(out.grad))
 
         out._backward = _backward
         return out
+    
+    def __rtruediv__(self, other):
+        print('----------------------->')
+        other = self._maybe_wrap_with_node(other)
+        return other / self
 
     def __pow__(self, value):
-        out = Node(data=self.data ** value, _children=(self,), _op='pow')
+        out = Node(data=_S(self.data) ** value, _children=(self,), _op='pow')
         
         def _backward():
             n = value
-            self.grad += (n * self.data ** (n-1)) *  out.grad
+            self.grad = _S(self.grad) + (_S(n) * _S(self.data) ** (_S(n)-1)) * _S(out.grad)
         
         out._backward = _backward
         return out
@@ -73,29 +79,27 @@ class Node:
     
     __rmul__ = __mul__
     
-    __rtruediv__ = __truediv__
-    
     def exp(self):
-        data = math.exp(self.data)
+        data = _S(self.data).exp()
         out = Node(data=data, _children=(self,), _op='exp')
 
         def _backward():
-            self.grad += data * out.grad
+            self.grad = _S(self.grad) + _S(data) * _S(out.grad)
         
         out._backward = _backward
         return out
     
     def log(self):
-        out = Node(data=math.log(self.data), _children=(self,), _op='log')
+        out = Node(data=_S(self.data).log(), _children=(self,), _op='log')
 
         def _backward():
-            self.grad += 1 / self.data * out.grad
+            self.grad = _S(self.grad) + (1 / _S(self.data) * _S(out.grad))
         
         out._backward = _backward
         return out
 
     def sqrt(self):
-        out = self ** 0.5
+        out = _S(self) ** 0.5
         return out
     
     def relu(self):
@@ -104,17 +108,17 @@ class Node:
 
         def _backward():
             value = 1.0 if self.data > 0.0 else 0.0
-            self.grad += value * out.grad
+            self.grad = _S(self.grad) + _S(value) * _S(out.grad)
         
         out._backward = _backward
         return out
 
     def sigmoid(self):
-        data = 1 / (1 + math.exp(-self.data))
+        data = 1 / (1 + _S(-self.data).exp())
         out = Node(data=data, _children=(self,), _op='sigmoid')
 
         def _backward():
-            self.grad += data * (1 - data) * out.grad
+            self.grad = _S(self.grad) + (_S(data) * (1 - _S(data)) * _S(out.grad))
         
         out._backward = _backward
         return out
@@ -123,7 +127,7 @@ class Node:
         out = Node(data=self.data, _children=(self,), _op='identity')
 
         def _backward():
-            self.grad += out.grad
+            self.grad = _S(self.grad) + _S(out.grad)
 
         out._backward = _backward
         return out
