@@ -139,7 +139,7 @@ Built with Python3.8.
 Core features such as executing forward and backward passes require no dependencies.  
 However, testing and graph visualization do require some.  
 Install them all via `requirements.txt` if needed.  
-I also recommend installing CPU-only build of torch via `pip install torch --index-url https://download.pytorch.org/whl/cpu`.
+I also recommend installing cpu-only build of torch via `pip install torch --index-url https://download.pytorch.org/whl/cpu`.
 
 # Testing
 `scalargrad` forward and backward implementations are heavily tested against PyTorch.  
