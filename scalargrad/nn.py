@@ -30,9 +30,9 @@ class Neuron:
     def initialize(self, w=None, b=None):
         if w is not None:
             assert len(w) == self.size
-        w = w or [random.uniform(-0.01, 0.01) for _ in range(self.size)]
+        w = w or [random.uniform(-0.1, 0.1) for _ in range(self.size)]
         self._w = [Node(wi, name=f'w{i}@{self.name}') for i, wi in enumerate(w)]
-        b = b or random.uniform(-0.01, 0.01)
+        b = b or random.uniform(-0.1, 0.1)
         self._b = Node(b, name=f'b@{self.name}')
 
     def parameters(self):
