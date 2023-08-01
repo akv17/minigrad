@@ -31,6 +31,22 @@ class Node:
         
         out._backward = _backward
         return out
+
+    def __sub__(self, other):
+        other = self._maybe_wrap_with_node(other)
+        out = Node(data=_S(self.data) - _S(other.data), _children=(self, other), _op='sub')
+        
+        def _backward():
+            self.grad = _S(self.grad) + 1.0 * _S(out.grad)
+            other.grad = _S(other.grad) - 1.0 * _S(out.grad)
+        
+        out._backward = _backward
+        return out
+
+    def __rsub__(self, other):
+        other = self._maybe_wrap_with_node(other)
+        res = other - self
+        return res
     
     def __mul__(self, other):
         other = self._maybe_wrap_with_node(other)
@@ -59,9 +75,8 @@ class Node:
 
         out._backward = _backward
         return out
-    
+
     def __rtruediv__(self, other):
-        print('----------------------->')
         other = self._maybe_wrap_with_node(other)
         return other / self
 

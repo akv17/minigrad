@@ -62,6 +62,11 @@ class TestOps(unittest.TestCase):
         ('add:0', '__add__', -1.0, 1.0),
         ('add:1', '__add__', -1.0, 0.0),
         ('add:2', '__add__', 11.49, -2.321),
+
+        ('sub:0', '__sub__', -1.0, 1.0),
+        ('sub:1', '__sub__', -1.0, 0.0),
+        ('sub:2', '__sub__', 11.49, -2.321),
+        ('sub:3', '__sub__', -11.49, -2.321),
         
         ('mul:0', '__mul__', 0.0, 1.0),
         ('mul:1', '__mul__', 2.0, 3.0),
@@ -107,6 +112,8 @@ class TestOps(unittest.TestCase):
     @parameterized.expand([
         ('add', 2.0, 3.0),
         ('mul', 2.0, 0.0),
+        ('div', 2.0, 0.0),
+        ('sub', 2.0, 0.0),
     ])
     def test_rdunders(self, name, a, c):
         m_a = Node(a, 'a')
@@ -114,5 +121,9 @@ class TestOps(unittest.TestCase):
             self.assertEqual((c + m_a).data, c + m_a.data)
         elif name == 'mul':
             self.assertEqual((c * m_a).data, c * m_a.data)
+        elif name == 'div':
+            self.assertEqual((c / m_a).data, c / m_a.data)
+        elif name == 'sub':
+            self.assertEqual((c - m_a).data, c - m_a.data)
         else:
             raise NotImplementedError
