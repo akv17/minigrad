@@ -22,6 +22,7 @@ b = Scalar(0.5, name='b')
 
 # define linear function and execute forward pass.
 f = (x0 * w0) + (x1 * w1) + b
+f.name = 'linear'
 
 # execute backward pass.
 f.backward()
