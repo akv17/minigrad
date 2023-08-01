@@ -122,7 +122,7 @@ class Node:
         return out
 
     def sqrt(self):
-        out = _S(self) ** 0.5
+        out = self ** 0.5
         return out
     
     def relu(self):

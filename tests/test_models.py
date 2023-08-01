@@ -72,5 +72,5 @@ class TestModels(unittest.TestCase):
                 cur_t_b_bwd = [cur_t_b_bwd.item()]
                 cur_neuron_w_bwd = [w.grad for w in cur_neuron._w]
                 cur_neuron_b_bwd = [cur_neuron._b.grad]
-                self.assertTrue(check_arr(cur_t_w_bwd, cur_neuron_w_bwd, tol=1e-4), msg='w_grad')
-                self.assertTrue(check_arr(cur_t_b_bwd, cur_neuron_b_bwd, tol=1e-4), msg='b_grad')
+                self.assertTrue(check_arr(cur_t_w_bwd, cur_neuron_w_bwd, tol=1e-4, show_diff=True), msg='w_grad')
+                self.assertTrue(check_arr(cur_t_b_bwd, cur_neuron_b_bwd, tol=1e-4, show_diff=True), msg='b_grad')

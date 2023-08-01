@@ -129,6 +129,9 @@ class TorchCompute(ICompute):
     def add(self, a, b):
         return (self._as_tensor(a) + self._as_tensor(b)).item()
     
+    def sub(self, a, b):
+        return (self._as_tensor(a) - self._as_tensor(b)).item()
+    
     def mul(self, a, b):
         return (self._as_tensor(a) * self._as_tensor(b)).item()
     
@@ -136,7 +139,7 @@ class TorchCompute(ICompute):
         return (self._as_tensor(a) / self._as_tensor(b)).item()
 
     def pow(self, a, b):
-        return (self._as_tensor(a) + self._as_tensor(b)).item()
+        return (self._as_tensor(a) ** self._as_tensor(b)).item()
     
     def exp(self, a):
         return (self._as_tensor(a).exp()).item()
@@ -152,7 +155,43 @@ class TorchCompute(ICompute):
     __rmul__ = mul
     
     __rtruediv__ = div
+
+
+class NumpyCompute(ICompute):
     
+    def __init__(self):
+        import numpy
+        self._np = numpy
+    
+    def add(self, a, b):
+        return (self._as_array(a) + self._as_array(b)).item()
+    
+    def sub(self, a, b):
+        return (self._as_array(a) - self._as_array(b)).item()
+    
+    def mul(self, a, b):
+        return (self._as_array(a) * self._as_array(b)).item()
+    
+    def div(self, a, b):
+        return (self._as_array(a) / self._as_array(b)).item()
+
+    def pow(self, a, b):
+        return (self._as_array(a) ** self._as_array(b)).item()
+    
+    def exp(self, a):
+        return self._np.exp(a).item()
+    
+    def log(self, a):
+        return self._np.log(a).item()
+
+    def _as_array(self, v):
+        return self._np.array(v, dtype=self._np.float64)
+    
+    __radd__ = add
+    
+    __rmul__ = mul
+    
+    __rtruediv__ = div
 
 
 def _init_compute():
@@ -162,9 +201,14 @@ def _init_compute():
         dispatch = {
             'py': PyCompute,
             'torch': TorchCompute,
+            'numpy': NumpyCompute,
         }
-        ob = dispatch[type_]()
-        _COMPUTE = ob
+        try:
+            ob = dispatch[type_]()
+            _COMPUTE = ob
+        except KeyError:
+            msg = f'unknown compute: {type_} ({list(dispatch)})'
+            raise Exception(msg)
 
 
 _init_compute()
