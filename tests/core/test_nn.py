@@ -9,7 +9,7 @@ except ImportError:
     raise ImportError('PyTorch required to run tests')
 
 from scalargrad.node import Node
-from scalargrad.nn import Neuron, Linear, Softmax, CrossEntropyLoss, SGD
+from scalargrad.nn import Neuron, Linear, Softmax, CrossEntropyLoss, MSELoss, SGD
 from tests.util import check_arr
 
 
@@ -170,7 +170,35 @@ class TestNN(unittest.TestCase):
         self.assertAlmostEqual(t_out.item(), m_out.data, places=4, msg='forward')
         t_bwd = [v.item() for v in t_outputs.grad.ravel()]
         m_bwd = [n.grad for out in m_outputs for n in out]
-        self.assertTrue(check_arr(t_bwd, m_bwd, tol=1e-4, show_diff=True))
+        self.assertTrue(check_arr(t_bwd, m_bwd, tol=1e-4, show_diff=True), msg='backward')
+
+    @parameterized.expand([
+        (4,),
+        (8,),
+        (32,),
+        (128,),
+        (256,),
+        (512,),
+    ])
+    def test_mse_loss(self, num_samples):
+        t_outputs = torch.rand((num_samples,), dtype=torch.float64, requires_grad=True)
+        t_targets = torch.rand((num_samples,), dtype=torch.float64, requires_grad=False)
+
+        outputs = t_outputs.tolist()
+        targets = t_targets.tolist()
+
+        t_out = torch.nn.MSELoss()(t_outputs, t_targets)
+        t_out.backward()
+
+        m_outputs = [Node(v, name=f'inp{i}') for i, v in enumerate(outputs)]
+        m_targets = targets
+        m_out = MSELoss()(m_outputs, m_targets)
+        m_out.backward()
+
+        self.assertAlmostEqual(t_out.item(), m_out.data, places=4, msg='forward')
+        t_bwd = t_outputs.grad.ravel().tolist()
+        m_bwd = [n.grad for n in m_outputs]
+        self.assertTrue(check_arr(t_bwd, m_bwd, tol=1e-4, show_diff=True), msg='backward')
 
     @parameterized.expand([
         (4, 0.1, None, 1),
