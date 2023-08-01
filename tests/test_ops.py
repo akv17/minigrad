@@ -20,6 +20,10 @@ class TestOps(unittest.TestCase):
         ('pow:4', '__pow__', 3.0, 4.3),
         ('pow:5', '__pow__', 1.0, 10),
         
+        ('neg:0', '__neg__', 2.31),
+        ('neg:1', '__neg__', -2.31),
+        ('neg:2', '__neg__', 0.0),
+        
         ('exp:0', 'exp', 2),
         ('exp:1', 'exp', 0),
         ('exp:2', 'exp', 1),

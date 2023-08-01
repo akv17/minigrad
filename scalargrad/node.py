@@ -89,6 +89,15 @@ class Node:
         out._backward = _backward
         return out
     
+    def __neg__(self):
+        out = Node(data=-_S(self.data), _children=(self,), _op='neg')
+        
+        def _backward():
+            self.grad = _S(self.grad) - _S(out.grad)
+        
+        out._backward = _backward
+        return out
+    
     __radd__ = __add__
     
     __rmul__ = __mul__
