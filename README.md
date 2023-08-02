@@ -43,7 +43,7 @@ Output:
 ```
 ![image](examples/linear.png)
 
-- __Learning XOR with MLP classifier__
+- __Learning XOR with neural network__
 ```python
 from scalargrad.nn import Linear, Sequential, CrossEntropyLoss, SGD, Softmax
 
@@ -150,6 +150,6 @@ As a consequence `torch`, `numpy` and `parameterized` are required for testing.
 - Test training (very slow): `python -m unittest discover -v tests/train`
 
 # Visualization
-Computational grpahs may be visualized by calling `.render()` on a leaf node.    
+Computational graphs may be visualized by calling `.render()` on a leaf node.    
 This requires dependencies `graphviz` and `Pillow`.  
 Be careful when attempting to visualize large graphs, it's really easy to run out of memory.   
